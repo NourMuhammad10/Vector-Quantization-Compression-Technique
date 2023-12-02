@@ -193,6 +193,7 @@ public class Quantizer {
     }
 
     public static void main(String[] args) {
+        new Quantizer().compress("input.txt", "");
     }
 
     public void decompress(String inputFilePath, String outputFilePath) {
