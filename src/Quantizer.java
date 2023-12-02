@@ -197,18 +197,39 @@ public class Quantizer {
 
     public static void main(String[] args) throws FileNotFoundException {
         String path = System.getProperty("user.dir") + "/compression" + ".bin";
-        new Quantizer().compress("input.txt", path);
+        Quantizer quantizer = new Quantizer();
+        quantizer.compress("input.txt", path);
         Vector<Integer> result = BinaryFilesHandler.readCompressedFile(path);
-
-        for(Integer integer : result){
-            System.out.println(integer);
-        }
+        quantizer.decompress(result);
     }
 
     public void decompress(Vector<Integer> compressionValues) {
         int codebookSize = compressionValues.get(0);
         int singleVectorLength = compressionValues.get(1);
-        Vector<Vector<Integer>> codebook;
+        int numberOfVectors = compressionValues.get(2);
+        Vector<Vector<Integer>> codebook = new Vector<>();
+        int endOverHead = 3 + (codebookSize * singleVectorLength);
+        for(int i = 3; i < endOverHead; i ++){
+            Vector<Integer> rowInCodebook = new Vector<>(singleVectorLength);
+            for(int j = 0; j < singleVectorLength; j++){
+                rowInCodebook.add(compressionValues.get(i++));
+            }
+            codebook.add(rowInCodebook);
+            i--;
+        }
+        int originalSize = numberOfVectors * singleVectorLength;
+        int dimension = (int) Math.sqrt(originalSize);
+        Vector<Vector<Integer>> originalGrid = new Vector<>(originalSize);
+        for(int i = endOverHead; i < compressionValues.size(); i++){
+            for(int j = 0; j < dimension; j += 2){
+                int label = compressionValues.get(i);
+                Vector<Integer> retrievedValue = codebook.get(label);
 
+            }
+        }
+//        System.out.println(originalSize);
+//        for (Vector<Integer> row : codebook){
+//            System.out.println(row);
+//        }
     }
 }

@@ -8,12 +8,12 @@ public class BinaryFilesHandler {
         int codebookLength = codebook.size();
         int singleVectorSize = codebook.get(0).size();
         int numberOfVectors = labels.size();
-        int overheadSize = 2 + (codebookLength * singleVectorSize);
-       // System.out.println(overheadSize);
+        int overheadSize = 3 + (codebookLength * singleVectorSize);
         byte[] overhead  = new byte[overheadSize];
         overhead[0] = toBinary(codebookLength);
         overhead[1] = toBinary(singleVectorSize);
-        int st = 2;
+        overhead[2] = toBinary(numberOfVectors);
+        int st = 3;
         for(int i = 0; i < codebookLength; i++){
             for(int j = 0; j < codebook.get(i).size(); j++){
                 overhead[st++] = toBinary((int) Math.round(codebook.get(i).get(j)));
