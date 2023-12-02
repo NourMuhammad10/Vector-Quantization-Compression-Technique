@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Vector;
 
 public class Quantizer {
-    void compress(String inputFilePath, String outputFilePath) {
+    public void compress(String inputFilePath, String outputFilePath) {
         String originalStream = "";
         Integer numLines = 0;
-        try{
+        try {
             BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
             while (reader.ready()) {
                 originalStream += reader.readLine();
@@ -18,11 +18,11 @@ public class Quantizer {
                 numLines++;
             }
             reader.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (originalStream.equals("")){
+        if (originalStream.equals("")) {
             return;
         }
 
@@ -30,8 +30,8 @@ public class Quantizer {
         Integer vectorLength = 4;
         Integer codebookLength = 4;
 
-        String [] lines = originalStream.split("\n");
-        List<String []> initialVectors = new ArrayList<>();
+        String[] lines = originalStream.split("\n");
+        List<String[]> initialVectors = new ArrayList<>();
 
         for (int i = 0; i < numLines; i++) {
             initialVectors.add(lines[i].split(" "));
@@ -41,26 +41,19 @@ public class Quantizer {
 
         for (int i = 0; i < numLines; i += 2) {
             for (int j = 0; j < numLines; j += 2) {
-                Vector<Double> currentVector = new Vector<>(4);
-                
+                Vector<Double> currentVector = new Vector<>(vectorLength);
+
                 currentVector.add(Double.valueOf(initialVectors.get(i)[j]));
                 currentVector.add(Double.valueOf(initialVectors.get(i)[j + 1]));
                 currentVector.add(Double.valueOf(initialVectors.get(i + 1)[j]));
                 currentVector.add(Double.valueOf(initialVectors.get(i + 1)[j + 1]));
-                
+
                 vectors.add(currentVector);
             }
         }
 
-//        for (int i = 0; i < numVectors; i += 1) {
-//            for (int j = 0; j < vectorLength; j += 1) {
-//                System.out.print(vectors.get(i).get(j) + " ");
-//            }
-//            System.out.println();
-//        }
-
         List<Vector<Double>> codebook = buildCodebook(vectors, codebookLength);
-        
+
         System.out.println(codebook);
 
         for (int i = 0; i < numVectors; i++) {
@@ -69,7 +62,7 @@ public class Quantizer {
 
     }
 
-    private List<Vector<Double>> buildCodebook(List<Vector<Double>> initialVectors, Integer requiredSize){
+    private List<Vector<Double>> buildCodebook(List<Vector<Double>> initialVectors, Integer requiredSize) {
 
         Integer numVectors = initialVectors.size();
         List<Vector<Double>> codebook = new ArrayList<>();
@@ -80,7 +73,6 @@ public class Quantizer {
             for (int j = 0; j < numVectors; j += 1) {
                 avg += initialVectors.get(j).get(i);
             }
-//            System.out.println(avg / numVectors);
             codebookInitialVector.add(avg / numVectors);
         }
 
@@ -95,19 +87,9 @@ public class Quantizer {
                 updatedCodebook.add(splitVector(codebook.get(i), 1.0));
             }
 
-//            for (int i = 0; i < numVectors; i++) {
-//                System.out.println("vector " + i + " " + initialVectors.get(i));
-//            }
-//
-//            for (int i = 0; i < updatedCodebook.size(); i++) {
-//                System.out.println("codebook " + i + " " + updatedCodebook.get(i));
-//            }
-
             List<Vector<Double>> updatedCodebook2 = new ArrayList<>();
 
             List<Vector<Vector<Double>>> quantized = quantize(initialVectors, updatedCodebook);
-
-//            System.out.println(quantized);
 
             for (int i = 0; i < quantized.size(); i++) {
 
@@ -123,23 +105,17 @@ public class Quantizer {
 
             }
 
-//            System.out.println(updatedCodebook2);
-
             codebook = updatedCodebook;
-//            System.out.println("Size = " + codebook.size());
-
         }
 
         List<Vector<Double>> updatedCodebook2;
 
-        while (true){
+        while (true) {
 
             updatedCodebook2 = new ArrayList<>();
 
             List<Vector<Vector<Double>>> quantized = quantize(initialVectors, codebook);
 
-//            System.out.println(quantized);
-
             for (int i = 0; i < quantized.size(); i++) {
 
                 Vector<Double> codeBookVector = new Vector<>();
@@ -154,15 +130,11 @@ public class Quantizer {
 
             }
 
-//            System.out.println(updatedCodebook2);
-
-            if (codebook.equals(updatedCodebook2)){
+            if (codebook.equals(updatedCodebook2)) {
                 break;
             }
 
             codebook = updatedCodebook2;
-//            System.out.println("Size = " + codebook.size());
-
         }
 
         return updatedCodebook2;
@@ -171,11 +143,11 @@ public class Quantizer {
     private Vector<Double> splitVector(Vector<Double> initialVector, Double scale) {
         Vector<Double> split = new Vector<>(initialVector.size());
         for (int i = 0; i < initialVector.size(); i++) {
-            if (initialVector.get(i) % 1 == 0){
+            if (initialVector.get(i) % 1 == 0) {
                 split.add(initialVector.get(i) + (scale));
-            }else if (scale > 0){
+            } else if (scale > 0) {
                 split.add(Math.ceil(initialVector.get(i)));
-            }else if (scale < 0){
+            } else if (scale < 0) {
                 split.add(Math.floor(initialVector.get(i)));
             }
         }
@@ -195,15 +167,6 @@ public class Quantizer {
         for (Vector<Double> inputVector : inputVectors) {
             int bestIndex = findClosestCodebookVector(inputVector, codebook);
             quantizedIndices.get(bestIndex).add(inputVector);
-        }
-        return quantizedIndices;
-    }
-
-    private List<Integer> vectorQuantization(List<Vector<Double>> inputVectors, List<Vector<Double>> codebook) {
-        List<Integer> quantizedIndices = new ArrayList<>();
-        for (Vector<Double> inputVector : inputVectors) {
-            int bestIndex = findClosestCodebookVector(inputVector, codebook);
-            quantizedIndices.add(bestIndex);
         }
         return quantizedIndices;
     }
@@ -232,13 +195,13 @@ public class Quantizer {
     public static void main(String[] args) {
     }
 
-    void decompress(String inputFilePath, String outputFilePath) {
+    public void decompress(String inputFilePath, String outputFilePath) {
         String compressedStream = "";
-        try{
+        try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath));
             writer.write(compressedStream);
             writer.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
