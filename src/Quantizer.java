@@ -1,13 +1,10 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 public class Quantizer {
-    public void compress(String inputFilePath, String outputFilePath) {
+    public void compress(String inputFilePath, String outputFilePath) throws FileNotFoundException {
         String originalStream = "";
         Integer numLines = 0;
         try {
@@ -54,11 +51,17 @@ public class Quantizer {
 
         List<Vector<Double>> codebook = buildCodebook(vectors, codebookLength);
 
-        System.out.println(codebook);
+//        System.out.println(codebook);
 
-        for (int i = 0; i < numVectors; i++) {
-            System.out.println(vectors.get(i) + " -> " + findClosestCodebookVector(vectors.get(i), codebook));
+//        for (int i = 0; i < numVectors; i++) {
+//            System.out.println(vectors.get(i) + " -> " + findClosestCodebookVector(vectors.get(i), codebook));
+//        }
+
+        Vector<Integer> labels = new Vector<>();
+        for(int i = 0; i < numVectors; i++){
+            labels.add(findClosestCodebookVector(vectors.get(i), codebook));
         }
+        BinaryFilesHandler.writeCompressedOutput(codebook, labels, outputFilePath);
 
     }
 
@@ -192,18 +195,20 @@ public class Quantizer {
         return Math.sqrt(sum);
     }
 
-    public static void main(String[] args) {
-        new Quantizer().compress("input.txt", "");
+    public static void main(String[] args) throws FileNotFoundException {
+        String path = System.getProperty("user.dir") + "/compression" + ".bin";
+        new Quantizer().compress("input.txt", path);
+        Vector<Integer> result = BinaryFilesHandler.readCompressedFile(path);
+
+        for(Integer integer : result){
+            System.out.println(integer);
+        }
     }
 
-    public void decompress(String inputFilePath, String outputFilePath) {
-        String compressedStream = "";
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath));
-            writer.write(compressedStream);
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void decompress(Vector<Integer> compressionValues) {
+        int codebookSize = compressionValues.get(0);
+        int singleVectorLength = compressionValues.get(1);
+        Vector<Vector<Integer>> codebook;
+
     }
 }
