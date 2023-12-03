@@ -51,11 +51,11 @@ public class Quantizer {
 
         List<Vector<Double>> codebook = buildCodebook(vectors, codebookLength);
 
-        System.out.println(codebook);
-
-        for (int i = 0; i < numVectors; i++) {
-            System.out.println(vectors.get(i) + " -> " + findClosestCodebookVector(vectors.get(i), codebook));
-        }
+//        System.out.println(codebook);
+//
+//        for (int i = 0; i < numVectors; i++) {
+//            System.out.println(vectors.get(i) + " -> " + findClosestCodebookVector(vectors.get(i), codebook));
+//        }
 
         Vector<Integer> labels = new Vector<>();
         for (int i = 0; i < numVectors; i++) {
@@ -195,15 +195,15 @@ public class Quantizer {
         return Math.sqrt(sum);
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         String path = System.getProperty("user.dir") + "/compression" + ".bin";
         Quantizer quantizer = new Quantizer();
         quantizer.compress("input.txt", path);
-        Vector<Integer> result = BinaryFilesHandler.readCompressedFile(path);
-        quantizer.decompress(result);
+        quantizer.decompress(path);
     }
 
-    public void decompress(Vector<Integer> compressionValues) {
+    public void decompress(String compressedFilePath) throws IOException {
+        Vector<Integer> compressionValues = BinaryFilesHandler.readCompressedFile(compressedFilePath);
         int codebookSize = compressionValues.get(0);
         int singleVectorLength = compressionValues.get(1);
         int numberOfVectors = compressionValues.get(2);
@@ -247,9 +247,18 @@ public class Quantizer {
             }
             i--;
         }
-        for(String row : original){
-            System.out.println(row);
-            System.out.println();
+        File file = new File(System.getProperty("user.dir") + "/decompressedOutput" + ".txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        try{
+            for(String row: original){
+                StringBuilder sb = new StringBuilder(row);
+                sb.deleteCharAt(row.length() - 1);
+                writer.write(sb.toString());
+                writer.write("\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
