@@ -247,6 +247,9 @@ public class Quantizer {
             }
             i--;
         }
-        System.out.println(original);
+        for(String row : original){
+            System.out.println(row);
+            System.out.println();
+        }
     }
 }
