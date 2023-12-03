@@ -51,14 +51,14 @@ public class Quantizer {
 
         List<Vector<Double>> codebook = buildCodebook(vectors, codebookLength);
 
-//        System.out.println(codebook);
+        System.out.println(codebook);
 
-//        for (int i = 0; i < numVectors; i++) {
-//            System.out.println(vectors.get(i) + " -> " + findClosestCodebookVector(vectors.get(i), codebook));
-//        }
+        for (int i = 0; i < numVectors; i++) {
+            System.out.println(vectors.get(i) + " -> " + findClosestCodebookVector(vectors.get(i), codebook));
+        }
 
         Vector<Integer> labels = new Vector<>();
-        for(int i = 0; i < numVectors; i++){
+        for (int i = 0; i < numVectors; i++) {
             labels.add(findClosestCodebookVector(vectors.get(i), codebook));
         }
         BinaryFilesHandler.writeCompressedOutput(codebook, labels, outputFilePath);
@@ -209,27 +209,44 @@ public class Quantizer {
         int numberOfVectors = compressionValues.get(2);
         Vector<Vector<Integer>> codebook = new Vector<>();
         int endOverHead = 3 + (codebookSize * singleVectorLength);
-        for(int i = 3; i < endOverHead; i ++){
+        for (int i = 3; i < endOverHead; i++) {
             Vector<Integer> rowInCodebook = new Vector<>(singleVectorLength);
-            for(int j = 0; j < singleVectorLength; j++){
+            for (int j = 0; j < singleVectorLength; j++) {
                 rowInCodebook.add(compressionValues.get(i++));
             }
             codebook.add(rowInCodebook);
             i--;
         }
         int originalSize = numberOfVectors * singleVectorLength;
-        int dimension = (int) Math.sqrt(originalSize);
-        Vector<Vector<Integer>> originalGrid = new Vector<>(originalSize);
-        for(int i = endOverHead; i < compressionValues.size(); i++){
-            for(int j = 0; j < dimension; j += 2){
-                int label = compressionValues.get(i);
-                Vector<Integer> retrievedValue = codebook.get(label);
-
+        int originalDimension = (int) Math.sqrt(originalSize);
+        int blockDimension = (int) Math.sqrt(singleVectorLength);
+        Vector<String> original = new Vector<>();
+        int numBlockInRow = originalDimension / blockDimension;
+        for (int i = endOverHead; i < compressionValues.size(); i++) {
+            Vector<Vector<Integer>> tempCodebook = new Vector<>();
+            int temp = numBlockInRow;
+            while(temp != 0){
+                tempCodebook.add(codebook.get(compressionValues.get(i)));
+                i++;
+                temp--;
             }
+            int times = blockDimension * blockDimension;
+            int index = 0;
+            while(index < times) {
+                StringBuilder row = new StringBuilder();
+                for (int j = 0; j < tempCodebook.size(); j++) {
+                    int temp2 = index;
+                    while (temp2 != (index + blockDimension)){
+                        row.append(Integer.toString(tempCodebook.get(j).get(temp2)));
+                        row.append(" ");
+                        temp2++;
+                    }
+                }
+                index += blockDimension;
+                original.add(row.toString());
+            }
+            i--;
         }
-//        System.out.println(originalSize);
-//        for (Vector<Integer> row : codebook){
-//            System.out.println(row);
-//        }
+        System.out.println(original);
     }
 }
