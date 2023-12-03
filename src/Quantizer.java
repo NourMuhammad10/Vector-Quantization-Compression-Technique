@@ -221,10 +221,10 @@ public class Quantizer {
 
         Quantizer quantizer = new Quantizer();
         quantizer.compress("input.txt", "compression.bin");
-        quantizer.decompress("compression.bin");
+        quantizer.decompress("compression.bin", "decompression.txt");
     }
 
-    public void decompress(String compressedFilePath) throws IOException {
+    public void decompress(String compressedFilePath, String decompressedFilePath) throws IOException {
         Vector<Integer> compressionValues = BinaryFilesHandler.readCompressedFile(compressedFilePath);
         int codebookSize = compressionValues.get(0);
         int singleVectorLength = compressionValues.get(1);
@@ -269,7 +269,8 @@ public class Quantizer {
             }
             i--;
         }
-        File file = new File(System.getProperty("user.dir") + "/decompressedOutput" + ".txt");
+//        File file = new File(System.getProperty("user.dir") + "/decompressedOutput" + ".txt");
+        File file = new File(decompressedFilePath);
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         try {
             for (String row : original) {
