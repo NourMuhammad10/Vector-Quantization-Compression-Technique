@@ -76,48 +76,47 @@ public class Quantizer {
 
     private List<Vector<Double>> buildCodebook(List<Vector<Double>> initialVectors, Integer requiredSize) {
 
-        Integer numVectors = initialVectors.size();
+        int numVectors = initialVectors.size();
         List<Vector<Double>> codebook = new ArrayList<>();
 
-        // calculate first average vector
+        // calculate the first average vector
         Vector<Double> codebookInitialVector = new Vector<>();
-        for (int i = 0; i < initialVectors.get(0).size(); i += 1) {
-            Double avg = 0.0;
-            for (int j = 0; j < numVectors; j += 1) {
-                avg += initialVectors.get(j).get(i);
+        for (int i = 0; i < initialVectors.get(0).size(); i++) {
+            double avg = 0.0;
+            for (int j = 0; j < numVectors; j++) {
+                avg += initialVectors.get(j).get(i).doubleValue();
             }
-            codebookInitialVector.add(avg / numVectors);
+            codebookInitialVector.add( Double.valueOf(avg / numVectors));
         }
         codebook.add(codebookInitialVector);
 
-        // loop till filling codebook
+        // loop until filling codebook
         while (codebook.size() < requiredSize) {
-
             List<Vector<Double>> updatedCodebook = new ArrayList<>();
 
             // do the splitting for every codebook vector
-            for (int i = 0; i < codebook.size(); i += 1) {
-                updatedCodebook.add(splitVector(codebook.get(i), -1.0));
-                updatedCodebook.add(splitVector(codebook.get(i), 1.0));
+            for (Vector<Double> vector : codebook) {
+                updatedCodebook.add(splitVector(vector, -1.0));
+                updatedCodebook.add(splitVector(vector, 1.0));
             }
 
             List<Vector<Double>> updatedCodebook2 = new ArrayList<>();
-
             List<Vector<Vector<Double>>> quantized = quantize(initialVectors, updatedCodebook);
 
             // calculate averages for every matched group separately
-            for (int i = 0; i < quantized.size(); i++) {
-
+            for (List<Vector<Double>> vectors : quantized) {
                 Vector<Double> codeBookVector = new Vector<>();
-                for (int j = 0; j < quantized.get(i).get(0).size(); j += 1) {
-                    Double avg = 0.0;
-                    for (int k = 0; k < quantized.get(i).size(); k++) {
-                        avg += quantized.get(i).get(k).get(j);
+                if (vectors.isEmpty()){
+                    break;
+                }
+                for (int j = 0; j < vectors.get(0).size(); j++) {
+                    double avg = 0.0;
+                    for (Vector<Double> vector : vectors) {
+                        avg += vector.get(j).doubleValue();
                     }
-                    codeBookVector.add(avg / quantized.get(i).size());
+                    codeBookVector.add(Double.valueOf(avg / vectors.size()));
                 }
                 updatedCodebook2.add(codeBookVector);
-
             }
 
             codebook = updatedCodebook;
@@ -125,27 +124,26 @@ public class Quantizer {
 
         List<Vector<Double>> updatedCodebook2;
 
-        // loop till no changed groups
+        // loop until no changed groups
         while (true) {
-
             updatedCodebook2 = new ArrayList<>();
 
             List<Vector<Vector<Double>>> quantized = quantize(initialVectors, codebook);
 
             // calculate averages for every matched group separately
-            // same as previous loop
-            for (int i = 0; i < quantized.size(); i++) {
-
+            for (List<Vector<Double>> vectors : quantized) {
                 Vector<Double> codeBookVector = new Vector<>();
-                for (int j = 0; j < quantized.get(i).get(0).size(); j += 1) {
-                    Double avg = 0.0;
-                    for (int k = 0; k < quantized.get(i).size(); k++) {
-                        avg += quantized.get(i).get(k).get(j);
+                if (vectors.isEmpty()){
+                    break;
+                }
+                for (int j = 0; j < vectors.get(0).size(); j++) {
+                    double avg = 0.0;
+                    for (Vector<Double> vector : vectors) {
+                        avg += vector.get(j).doubleValue();
                     }
-                    codeBookVector.add(avg / quantized.get(i).size());
+                    codeBookVector.add(Double.valueOf(avg / vectors.size()));
                 }
                 updatedCodebook2.add(codeBookVector);
-
             }
 
             // stop when no change
@@ -220,7 +218,7 @@ public class Quantizer {
 //        quantizer.decompress(path);
 
         Quantizer quantizer = new Quantizer();
-        quantizer.compress("input.txt", "compression.bin");
+        quantizer.compress("input2.txt", "compression.bin");
         quantizer.decompress("compression.bin", "decompression.txt");
     }
 
