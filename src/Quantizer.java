@@ -24,9 +24,9 @@ public class Quantizer {
             return;
         }
 
-        Integer codebookLength = 4;
-        Integer vectorHeight = 2;
-        Integer vectorWidth = 2;
+        Integer codebookLength = 8;
+        Integer vectorHeight = 4;
+        Integer vectorWidth = 4;
         Integer vectorLength = vectorWidth * vectorHeight;
         Integer numVectors = (int) Math.pow((double) numLines, 2) / vectorLength;
 
