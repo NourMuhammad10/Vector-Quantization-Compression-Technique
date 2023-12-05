@@ -121,7 +121,7 @@ public class Quantizer {
         g2d.dispose();
 
         try {
-            ImageIO.write(image, "jpg", new File("result.png"));
+            ImageIO.write(image, "png", new File("result.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
