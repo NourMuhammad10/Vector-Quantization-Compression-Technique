@@ -84,6 +84,8 @@ public class Quantizer {
         }
 
 //        System.out.println(labels.size());
+
+        // todo start save to binary file
         // save the output
 //        BinaryFilesHandler.writeCompressedOutput(codebook, labels, outputFilePath);
 
@@ -91,11 +93,6 @@ public class Quantizer {
         Graphics2D g2d = image.createGraphics();
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, height, width);
-
-        int xSpacing = width / vectorWidth;
-        int ySpacing = height / vectorHeight;
-//        System.out.println(xSpacing);
-//        System.out.println(ySpacing);
 
         int position = 0;
 
@@ -128,6 +125,7 @@ public class Quantizer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // todo end save to binary file
 
     }
 
