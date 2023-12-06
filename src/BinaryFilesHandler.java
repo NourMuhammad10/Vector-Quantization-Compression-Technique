@@ -1,22 +1,28 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
 public class BinaryFilesHandler {
-    public static void writeCompressedOutput(List<Vector<Double>> codebook, Vector<Integer> labels, String outputFilePath) throws FileNotFoundException {
+    public static void writeCompressedOutput(Vector<Vector<Vector<Integer>>> codebook, Vector<Integer> labels, String outputFilePath, int imageHeight, int imageWidth) throws FileNotFoundException {
+        int vectorHeight = codebook.get(0).size();
+        int vectorWidth = codebook.get(0).get(0).size();
+        int singleVectorSize = vectorHeight * vectorWidth;
         int codebookLength = codebook.size();
-        int singleVectorSize = codebook.get(0).size();
         int numberOfVectors = labels.size();
-        int overheadSize = 3 + (codebookLength * singleVectorSize);
+        int overheadSize = 4 + (codebookLength * singleVectorSize);
         byte[] overhead  = new byte[overheadSize];
-        overhead[0] = toBinary(codebookLength);
-        overhead[1] = toBinary(singleVectorSize);
-        overhead[2] = toBinary(numberOfVectors);
-        int st = 3;
+        overhead[0] = toBinary(overheadSize);
+        overhead[1] = toBinary(codebookLength);
+        overhead[2] = toBinary(vectorHeight);
+        overhead[3] = toBinary(vectorWidth);
+        int st = 4;
         for(int i = 0; i < codebookLength; i++){
-            for(int j = 0; j < codebook.get(i).size(); j++){
-                overhead[st++] = toBinary((int) Math.round(codebook.get(i).get(j)));
+            for(int j = 0; j < codebook.get(i).size(); j++) {
+                for (int k = 0; k < codebook.get(i).get(j).size(); k++) {
+                    overhead[st++] = (toBinary((codebook.get(i).get(j).get(k))));
+                }
             }
         }
         byte[] mappedIndices = new byte[numberOfVectors];
@@ -38,7 +44,7 @@ public class BinaryFilesHandler {
         }
     }
 
-    public static Vector<Integer> readCompressedFile(String filePath) throws FileNotFoundException {
+    public static Vector<Integer> readCompressedFile(String filePath) {
         File file = new File(filePath);
         Vector<Integer> compressedValues = new Vector<>();
 
@@ -69,7 +75,7 @@ public class BinaryFilesHandler {
     }
 
     private static byte binaryStringToByte(String binaryString){
-        int decimal = Integer.parseInt(binaryString, 2);
-        return (byte) decimal;
+        int integer = Integer.parseInt(binaryString, 2);
+        return (byte) integer;
     }
 }

@@ -7,6 +7,25 @@ import java.util.List;
 import java.util.Vector;
 
 public class Quantizer {
+    public int getImageHeight() {
+        return imageHeight;
+    }
+
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    public void setImageHeight(int imageHeight) {
+        this.imageHeight = imageHeight;
+    }
+
+    int imageHeight;
+
+    public void setImageWidth(int imageWidth) {
+        this.imageWidth = imageWidth;
+    }
+
+    int imageWidth;
     public void compress(String inputFilePath, String outputFilePath) throws FileNotFoundException {
 
         Vector<Vector<Integer>> imageVector = null;
@@ -17,6 +36,8 @@ public class Quantizer {
             BufferedImage image = ImageIO.read(new File(inputFilePath));
             width = image.getWidth();
             height = image.getHeight();
+            setImageHeight(height);
+            setImageWidth(width);
 
 //            System.out.println(width);
 //            System.out.println(height);
@@ -54,9 +75,9 @@ public class Quantizer {
         for (int i = 0; i < height; i += vectorHeight) {
             for (int j = 0; j < width; j += vectorWidth) {
                 Vector<Vector<Integer>> row = new Vector<>();
-                for (int k = i; k < i + vectorHeight  ; k++) {
+                for (int k = i; k < i + vectorHeight; k++) {
                     Vector<Integer> currentVector = new Vector<>();
-                    for (int l = j; l < j + vectorWidth  ; l++) {
+                    for (int l = j; l < j + vectorWidth; l++) {
                         currentVector.add(imageVector.get(k).get(l));
                     }
                     row.add(currentVector);
@@ -84,48 +105,44 @@ public class Quantizer {
         }
 
 //        System.out.println(labels.size());
+        BinaryFilesHandler.writeCompressedOutput(codebook, labels, outputFilePath, height, width);
 
-        // todo start save to binary file
-        // save the output
-//        BinaryFilesHandler.writeCompressedOutput(codebook, labels, outputFilePath);
-
-        BufferedImage image = new BufferedImage(height, width, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = image.createGraphics();
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, height, width);
-
-        int position = 0;
-
-        for (int i = 0; i < height; i += vectorHeight) {
-            for (int j = 0; j < width; j += vectorWidth) {
-
-                Vector<Vector<Integer>> currentVector = getVector(labels.get(position), codebook);
-                for (int k = 0; k < currentVector.size(); k++) {
-                    for (int l = 0; l < currentVector.get(k).size(); l++) {
-
-                        int label = currentVector.get(k).get(l);
-
-                        Color color = new Color(label, label, label);
-                        int pixelX = i + k;
-                        int pixelY = j + l;
-                        g2d.setColor(color);
-                        g2d.fillRect(pixelX, pixelY, 1, 1);
-
-                    }
-                }
-
-                position++;
-            }
-        }
-
-        g2d.dispose();
-
-        try {
-            ImageIO.write(image, "png", new File("result.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // todo end save to binary file
+//        BufferedImage image = new BufferedImage(height, width, BufferedImage.TYPE_INT_RGB);
+//        Graphics2D g2d = image.createGraphics();
+//        g2d.setColor(Color.WHITE);
+//        g2d.fillRect(0, 0, height, width);
+//
+//        int position = 0;
+//
+//        for (int i = 0; i < height; i += vectorHeight) {
+//            for (int j = 0; j < width; j += vectorWidth) {
+//
+//                Vector<Vector<Integer>> currentVector = getVector(labels.get(position), codebook);
+//                for (int k = 0; k < currentVector.size(); k++) {
+//                    for (int l = 0; l < currentVector.get(k).size(); l++) {
+//
+//                        int label = currentVector.get(k).get(l);
+//
+//                        Color color = new Color(label, label, label);
+//                        int pixelX = i + k;
+//                        int pixelY = j + l;
+//                        g2d.setColor(color);
+//                        g2d.fillRect(pixelX, pixelY, 1, 1);
+//
+//                    }
+//                }
+//
+//                position++;
+//            }
+//        }
+//
+//        g2d.dispose();
+//
+//        try {
+//            ImageIO.write(image, "png", new File("result.png"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
@@ -160,13 +177,13 @@ public class Quantizer {
 
             // do the splitting for every codebook vector
             for (int i = 0; i < codebook.size(); i += 1) {
-                Vector<Vector<Integer>> code1 = new Vector<>() , code2 = new Vector<>();
-                for(int j = 0 ; j < codebook.get(i).size() ; j++){
+                Vector<Vector<Integer>> code1 = new Vector<>(), code2 = new Vector<>();
+                for (int j = 0; j < codebook.get(i).size(); j++) {
                     Vector<Integer> temp1 = new Vector<>();
                     Vector<Integer> temp2 = new Vector<>();
-                    for(int k = 0 ; k < codebook.get(i).get(0).size() ; k++){
+                    for (int k = 0; k < codebook.get(i).get(0).size(); k++) {
                         temp1.add((int) Math.floor(codebook.get(i).get(j).get(k)));
-                        temp2.add((int) (Math.floor(codebook.get(i).get(j).get(k))+1));
+                        temp2.add((int) (Math.floor(codebook.get(i).get(j).get(k)) + 1));
 
                     }
                     code1.add(temp1);
@@ -278,77 +295,73 @@ public class Quantizer {
     private Integer calculateDistance(Vector<Vector<Integer>> vector1, Vector<Vector<Integer>> vector2) {
         int sum = 0;
         for (int i = 0; i < vector1.size(); i++) {
-            for(int j = 0 ;  j < vector1.size(); j++) {
-                sum +=(int) Math.pow(vector1.get(i).get(j) - vector2.get(i).get(j), 2);
+            for (int j = 0; j < vector1.size(); j++) {
+                sum += (int) Math.pow(vector1.get(i).get(j) - vector2.get(i).get(j), 2);
             }
         }
         return (int) Math.sqrt(sum);
     }
 
+    public void decompress(String compressedFilePath, String decompressedFilePath){
+        int imageHeight = getImageHeight();
+        int imageWidth = getImageWidth();
+        Vector<Integer> compressionValues = BinaryFilesHandler.readCompressedFile(compressedFilePath);
+        int overHeadSize = compressionValues.get(0) & 0xff;
+        int codebookLength = compressionValues.get(1) & 0xff;
+        int vectorHeight = compressionValues.get(2) & 0xff;
+        int vectorWidth = compressionValues.get(3) & 0xff;
+        Vector<Vector<Vector<Integer>>> codebook = new Vector<>();
+        int index = 4;
+        while (index < overHeadSize) {
+            Vector<Vector<Integer>> rowInCodebook = new Vector<>();
+            for (int i = 0; i < vectorHeight; i++) {
+                Vector<Integer> rowInVector = new Vector<>();
+                for (int j = 0; j < vectorWidth; j++) {
+                    int pixelValue = ((int) compressionValues.get(index++)) & 0xff;
+                    rowInVector.add(j, pixelValue);
+                }
+                rowInCodebook.add(i, rowInVector);
+            }
+            codebook.add(rowInCodebook);
+        }
+        Vector<Integer> labels = new Vector<>();
+        for(int i = overHeadSize; i < compressionValues.size(); i++){
+            int labelValue = (compressionValues.get(i)) & 0xff;
+            labels.add(labelValue);
+        }
+        BufferedImage image = new BufferedImage(imageHeight, imageWidth, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = image.createGraphics();
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, imageHeight, imageWidth);
+        int position = 0;
+        for(int i = 0; i < imageHeight; i+= vectorHeight){
+            for(int j = 0; j < imageWidth; j += vectorWidth){
+                Vector<Vector<Integer>> currentVector = getVector(labels.get(position), codebook);
+                for(int k = 0; k < currentVector.size(); k++){
+                    for(int l = 0; l < currentVector.get(k).size(); l++){
+                        int label = currentVector.get(k).get(l);
+                        Color color = new Color(label, label, label);
+                        int pixelX = i + k;
+                        int pixelY = j + l;
+                        g2d.setColor(color);
+                        g2d.fillRect(pixelX, pixelY, 1, 1);
+                    }
+                }
+                position++;
+            }
+        }
+        g2d.dispose();
+        try {
+            ImageIO.write(image, "png", new File(decompressedFilePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         Quantizer quantizer = new Quantizer();
         quantizer.compress("img1.png", "compression.bin");
-//        quantizer.decompress("compression.bin", "decompression.txt");
-    }
-
-    public void decompress(String compressedFilePath, String decompressedFilePath) throws IOException {
-        Vector<Integer> compressionValues = BinaryFilesHandler.readCompressedFile(compressedFilePath);
-        int codebookSize = compressionValues.get(0);
-        int singleVectorLength = compressionValues.get(1);
-        int numberOfVectors = compressionValues.get(2);
-        Vector<Vector<Integer>> codebook = new Vector<>();
-        int endOverHead = 3 + (codebookSize * singleVectorLength);
-        for (int i = 3; i < endOverHead; i++) {
-            Vector<Integer> rowInCodebook = new Vector<>(singleVectorLength);
-            for (int j = 0; j < singleVectorLength; j++) {
-                rowInCodebook.add(compressionValues.get(i++));
-            }
-            codebook.add(rowInCodebook);
-            i--;
-        }
-        int originalSize = numberOfVectors * singleVectorLength;
-        int originalDimension = (int) Math.sqrt(originalSize);
-        int blockDimension = (int) Math.sqrt(singleVectorLength);
-        Vector<String> original = new Vector<>();
-        int numBlockInRow = originalDimension / blockDimension;
-        for (int i = endOverHead; i < compressionValues.size(); i++) {
-            Vector<Vector<Integer>> tempCodebook = new Vector<>();
-            int temp = numBlockInRow;
-            while (temp != 0) {
-                tempCodebook.add(codebook.get(compressionValues.get(i)));
-                i++;
-                temp--;
-            }
-            int times = blockDimension * blockDimension;
-            int index = 0;
-            while (index < times) {
-                StringBuilder row = new StringBuilder();
-                for (int j = 0; j < tempCodebook.size(); j++) {
-                    int temp2 = index;
-                    while (temp2 != (index + blockDimension)) {
-                        row.append(Integer.toString(tempCodebook.get(j).get(temp2)));
-                        row.append(" ");
-                        temp2++;
-                    }
-                }
-                index += blockDimension;
-                original.add(row.toString());
-            }
-            i--;
-        }
-//        File file = new File(System.getProperty("user.dir") + "/decompressedOutput" + ".txt");
-        File file = new File(decompressedFilePath);
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        try {
-            for (String row : original) {
-                StringBuilder sb = new StringBuilder(row);
-                sb.deleteCharAt(row.length() - 1);
-                writer.write(sb.toString());
-                writer.write("\n");
-            }
-            writer.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        quantizer.decompress("compression.bin", "result2.png");
     }
 }
+

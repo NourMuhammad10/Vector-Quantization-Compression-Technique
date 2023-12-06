@@ -81,25 +81,21 @@ public class Main {
                 String decompressedFilePath = currentFilePath.getParent().toString() + "/" +
                         currentFilePath.getFileName().toString().split("\\.")[0] + "-decompressed.txt";
 
-                try {
-                    quantizer.decompress(currentFilePath.toString(), decompressedFilePath);
+                quantizer.decompress(currentFilePath.toString(), decompressedFilePath);
 
-                    JLabel label = new JLabel("File successfully decompressed.");
-                    label.setBounds(180, 300, 200, 20);
-                    frame.add(label);
-                    frame.repaint();
+                JLabel label = new JLabel("File successfully decompressed.");
+                label.setBounds(180, 300, 200, 20);
+                frame.add(label);
+                frame.repaint();
 
-                    new Timer(2000, new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            frame.remove(label);
-                            frame.repaint();
-                        }
-                    }).start();
+                new Timer(2000, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        frame.remove(label);
+                        frame.repaint();
+                    }
+                }).start();
 
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
             }
         });
         frame.add(decompress);
