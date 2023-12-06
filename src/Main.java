@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -79,7 +80,7 @@ public class Main {
                 }
 
                 String decompressedFilePath = currentFilePath.getParent().toString() + "/" +
-                        currentFilePath.getFileName().toString().split("\\.")[0] + "-decompressed.txt";
+                        currentFilePath.getFileName().toString().split("\\.")[0] + "-decompressed.png";
 
                 quantizer.decompress(currentFilePath.toString(), decompressedFilePath);
 
